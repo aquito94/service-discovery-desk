@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 ## Estilo de respuesta
+
 - Directo desde la primera palabra: sin saludos ni cierres de cortesía.
 - Sin elogios a las ideas, preguntas o código del usuario.
 - Sin disculpas: si hay un error, entregar el resultado corregido.
@@ -9,9 +10,11 @@
 - Idioma: español (respuestas, commits y textos de la interfaz).
 
 ## Qué es
+
 Portafolio consultivo de Netlife Business para partners y clientes. Sitio pre-renderizado (SSG) con TanStack Start, generado y sincronizado con Lovable. Los textos del sitio viven en `src/data/`, no en los componentes.
 
 ## Stack y versiones (según `package.json`)
+
 - Gestor de paquetes: **Bun** (`bun.lock`, `bunfig.toml`; Netlify ejecuta `bun run build`). No hay `package-lock.json` ni `pnpm-lock.yaml` y no deben crearse.
 - React `^19.2.0`, TypeScript `^5.8.3` (modo estricto).
 - TanStack Start `1.168.60`, TanStack Router `1.170.41`, Router Plugin `1.168.42`, React Query `^5.101.1`.
@@ -23,6 +26,7 @@ Portafolio consultivo de Netlife Business para partners y clientes. Sitio pre-re
 - Node: el entorno usado para verificar este archivo tenía Node 22 y Bun 1.4; la versión mínima requerida **por confirmar** (no hay `engines` ni `.nvmrc`).
 
 ## Comandos
+
 ```bash
 bun install            # instalación (respeta minimumReleaseAge de 24 h en bunfig.toml)
 bun run dev            # servidor de desarrollo (vite dev)
@@ -33,9 +37,11 @@ bun run lint           # eslint .
 npx tsc --noEmit       # verificación de tipos (no hay script dedicado)
 bun run format         # prettier --write . — NO ejecutar sin pedirlo (ver "Qué no tocar")
 ```
+
 No hay framework de tests ni script `test`.
 
 ## Estructura de `src/`
+
 ```
 src/
 ├── routes/                 # Rutas por archivo (TanStack). Leer src/routes/README.md
@@ -65,12 +71,15 @@ src/
 ```
 
 ## Convenciones
+
 **Rutas**
+
 - Una ruta = un archivo en `src/routes/` con `createFileRoute`. Parámetros dinámicos con `$` (`soluciones.$slug.tsx`).
 - Cada ruta define `head()` con `title`, `description` y `og:*`; patrón de título: `<Página> · Netlife Business`.
 - Toda ruta nueva o slug nuevo debe añadirse a `tanstackStart.pages` en `vite.config.ts`; el pre-render tiene `crawlLinks: false` y `autoStaticPathsDiscovery: false`, así que lo que no está listado no se genera.
 
 **Componentes**
+
 - Exports con nombre y componentes en PascalCase (`export function SiteHeader()`).
 - Importar con alias `@/` (`@/components/ui/button`, `@/data/portfolio`), no con rutas relativas largas.
 - Orden de imports: librerías externas, línea en blanco, imports `@/`.
@@ -82,6 +91,7 @@ src/
 - Secretos solo vía `process.env["NOMBRE"]` (acceso con corchetes por `noPropertyAccessFromIndexSignature`).
 
 **Estilos**
+
 - Solo clases de Tailwind; combinar clases condicionales con `cn()`.
 - Usar los tokens semánticos de `styles.css` (`bg-background`, `text-foreground`, `text-muted-foreground`, `bg-primary`, `brand`, `brand-warm`, `ink`, `surface`, `cyan`, `chart-1..5`), nunca colores hex/oklch sueltos en componentes.
 - Variantes con `cva` siguiendo el patrón de `components/ui/button.tsx`.
@@ -89,6 +99,7 @@ src/
 - Diseño responsive móvil primero; la navegación de escritorio aparece en `xl:`.
 
 ## Validar un cambio antes de darlo por terminado
+
 1. `npx tsc --noEmit` → debe terminar sin errores (hoy pasa limpio).
 2. `bun run lint` → **hoy falla de base**: 171 errores (170 de `prettier/prettier` en 17 archivos + 1 `no-control-regex` en `oportunidad.functions.ts`) y 6 avisos `react-refresh`. Criterio: el cambio no agrega errores nuevos. Formatear solo los archivos tocados con `npx prettier --write <archivos>`.
 3. `bun run build` → debe terminar en 0 y listar en `[prerender]` cada ruta afectada. Revisar que exista el HTML en `.output/public/<ruta>/`.
@@ -97,6 +108,7 @@ src/
 6. No dejar `.output/` ni otros artefactos fuera de `.gitignore`.
 
 ## Qué no tocar
+
 - `src/routeTree.gen.ts`: se genera solo.
 - `vite.config.ts`: solo añadir entradas a `pages`. No agregar plugins (React, Tailwind, TanStack, tsconfig-paths, Nitro ya vienen en la configuración de Lovable; duplicarlos rompe la app).
 - `src/server.ts`, `src/start.ts`, `src/lib/error-capture.ts`, `src/lib/error-page.ts`, `src/lib/lovable-error-reporting.ts`: infraestructura de errores y CSRF de Lovable.
@@ -108,10 +120,12 @@ src/
 - Git: no reescribir historial publicado (sin force push, rebase, amend ni squash de commits subidos); mantener la rama funcional (ver `AGENTS.md`).
 
 ## Despliegue
+
 - Lovable publica en `https://partner-spotlight-06.lovable.app` (según `README.md`).
 - `netlify.toml`: build `NITRO_PRESET=cloudflare-module bun run build`, publica `.output/public` (solo estático) con fallback SPA a `/index.html`.
 - **Por confirmar**: en Netlify solo se sirven los archivos estáticos, así que la server function de `/oportunidad` no tendría servidor que la ejecute. El formulario probablemente falla ahí y solo funciona en el hosting de Lovable. Además, el fallback a `/index.html` no aplica a las rutas pre-renderizadas, que tienen su propio `index.html`.
 - **Por confirmar**: variables `LOVABLE_API_KEY`, `GOOGLE_MAIL_API_KEY`, `GOOGLE_SHEETS_API_KEY`; se leen en el código, pero no está documentado dónde se configuran.
 
 ## Privacidad
+
 No guardar en el repositorio credenciales, claves, datos personales de clientes ni contenido confidencial. Pendiente: `src/lib/oportunidad.functions.ts` tiene correos de destinatarios y el ID de una hoja de cálculo escritos en el código; moverlos a variables de entorno.
